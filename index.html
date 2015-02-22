@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<!--gak tau mau bikin apa kakak :" -->
+	<meta charset="UTF-8">
+	<Title>Webdev :3</title>
+	<link rel="icon" href="img/favicon.ico" />
+	<style>
+		body {
+			margin: 0;
+			overflow: hidden;
+			background: #000000;
+			color: #ffffff;
+			font-family: sans-serif;
+			text-align: center;
+		}
+	</style>
+</head>
+<body>
+	<p>drag to move camera</p>
+	<script src="js/three.min.js"></script>
+	<script src="js/starField.js"></script>
+	<script src="js/TrackballControls.js"></script>
+	<script>
+		renderer = new THREE.WebGLRenderer({antialias:true});
+		renderer.setSize(window.innerWidth, window.innerHeight);
+
+		document.body.appendChild(renderer.domElement);
+		renderer.setClearColor(0x000000, 1);
+
+		var camera = new THREE.PerspectiveCamera(30, window.innerWidth / window.innerHeight, 1, 4000);
+		camera.position.set(0, 0, 1000);
+
+		var scene = new THREE.Scene();
+		scene.add(camera);
+
+		var earthMaterial = new THREE.MeshLambertMaterial({
+			map: THREE.ImageUtils.loadTexture("img/earthmap1k.jpg")
+		});
+		var earthObject = new THREE.Mesh(
+			new THREE.SphereGeometry(100, 32, 32),
+			earthMaterial
+		);
+		scene.add(earthObject);
+
+		var moonMaterial = new THREE.MeshLambertMaterial({
+			map: THREE.ImageUtils.loadTexture("img/moonmap1k.jpg")
+		});
+		var moonObject = new THREE.Mesh(
+			new THREE.SphereGeometry(27, 32, 32),
+			moonMaterial
+		);
+		moonObject.position.x += 300;
+		scene.add(moonObject);
+
+		var light = new THREE.DirectionalLight(0xffffff, 1);
+		light.position.set(0, 0, 1800);
+		scene.add(light);
+
+		var control = new THREE.TrackballControls(camera);
+		control.addEventListener("change", updateView);
+
+		var left = true;
+		var rightFront = true, leftFront = false, leftBehind = false, rightBehind = false;
+
+		animation();
+
+		function animation() {
+			earthObject.rotation.y += 0.1;
+			moonObject.rotation.y += 0.1;
+			if (moonObject.position.x <= -320) {
+				left = false;
+				//console.log(moonObject.position.z);
+			} else if (moonObject.position.x >= 300) {
+				left = true;
+				//console.log(moonObject.position.z);
+			}
+			if (moonObject.position.x >= 0 && left) {
+				moonObject.position.z += 10;
+			}
+			else if (moonObject.position.x < 0 && left) {
+				moonObject.position.z -= 10;
+			}
+			else if (moonObject.position.x < -10 && !left) {
+				moonObject.position.z -= 10;
+			}
+			else if (moonObject.position.x >= -10 && !left) {
+				moonObject.position.z += 10;
+			}
+			moonObject.position.x += left ? -10 : 10;
+			renderer.render(scene, camera);
+			requestAnimationFrame(function(){
+				animation();
+			});
+			control.update();
+		}
+
+		function updateView() {
+			renderer.render(scene, camera);
+		}
+
+		makeCircles();
+		updateCircles();
+
+	</script>
+</body>
+</html>
